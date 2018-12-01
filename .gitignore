@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+.idea/conway-experiment.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+

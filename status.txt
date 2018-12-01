@@ -1,0 +1,12 @@
+
+
+I'll make a function that iterates the number it has to go over in order to
+switch, capture the number of cells that change on and off and/or generations
+that happen in order to tune to the most lively results.
+
+---------------
+
+
+
+ Will have to deep copy the matrices at the end.
+
