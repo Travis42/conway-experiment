@@ -36,19 +36,28 @@ class markovModelNormalized(tradModel):
                     grid[i][j] = self.cell(On=0, rand_val=rand_val)
 
 
-    def next_gen(self, parameter_count):
+    def next_gen(self):
 
         for i in range(0, height):
             for j in range(0, width):
+                # find a live cell
+                    # if live:
+                        # find all probability measures in neighboring cells
+                        # normalize them so they add to 1
+                        # flip a coin based on the relative probabilities.
+                        # the cell that wins is alive, and the cell we're on
+                # is not
+                    # keep a tally of cells turned on this round so we don't
+                # revisit them.
                 alive_or_dead = 0
                 count = self.count_neighbors(self.grid_model, i, j)
                 rand_val = random.random()
-
+                placeholder = 69
                 if self.grid_model[i][j].On == 0:
-                    if count > parameter_count:
+                    if count > placeholder:
                         alive_or_dead = 1
                 elif self.grid_model[i][j].On == 1:
-                    if count <= parameter_count:
+                    if count < placeholder:
                         alive_or_dead = 0
                 self.next_grid_model[i][j] = self.cell(On=alive_or_dead,
                                                 rand_val=rand_val)
@@ -58,7 +67,7 @@ class markovModelNormalized(tradModel):
         self.next_grid_model = temp
 
 
-    # TODO: left off here.
+    # TODO: left off here.  This loads objects like the glider.
 
     # TODO: use this to regen the grid.  By replicating and offsetting, I can
     # keep the GOL going forever. Just replicate whatever exists, offset it,

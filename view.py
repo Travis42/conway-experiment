@@ -6,7 +6,8 @@ from tradmodel import tradModel
 from settings import *
 
 def setup():
-    global root, grid_view, cell_size, start_button, clear_button, choice, model
+    global root, grid_view, cell_size, start_button, clear_button, choice, \
+        model, ruleset
 
     root = Tk()
     root.title('The Game of Life')
@@ -31,7 +32,7 @@ def setup():
     ruleset.set('Choose a Rule Set')
     # OptionMenu takes the root window, the ruleset object, and we can write
     # in our various options:
-    rules = OptionMenu(root, ruleset, 'Traditional',
+    rules = OptionMenu(root, ruleset, "Traditional",
                        "Markov Neighbors Normalized",
                        command=ruleset_handler
                        # for binding to functions in menu
@@ -52,12 +53,12 @@ def setup():
 
 def ruleset_handler(event):
     global is_running, start_button, grid_model, next_grid_model, model, \
-        model_name
-
-    print('name', model_name)
+     choice
 
     is_running = False
     start_button.configure(text='Start')
+
+    model_name = ruleset.get()
 
     if model_name == "Markov Neighbors Normalized":
         model = markovModelNormalized(grid_model, next_grid_model)
@@ -135,10 +136,9 @@ def update():
         height, width
 
     grid_view.delete(ALL)
-    # TODO: here the original just calls model.next_gen()
     model.next_gen()
     try:
-        # grid_model, next_grid_model = model.next_gen(grid_model,
+        #grid_model, next_grid_model = model.next_gen(grid_model,
         # next_grid_model)
 
         for i in range(0, height):
