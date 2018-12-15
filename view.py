@@ -1,20 +1,12 @@
 from tkinter import *
 
-from coin_flip import coin_flip
 from markov_model import markovModelNormalized
 from patterns import glider_pattern, glider_gun_pattern
 from tradmodel import tradModel
-
-cell_size: int = 5
-is_running: bool = False
-model_name = "Traditional"
-model = None
-height = 100
-width = 100
-
+from settings import *
 
 def setup():
-    global root, grid_view, cell_size, start_button, clear_button, choice
+    global root, grid_view, cell_size, start_button, clear_button, choice, model
 
     root = Tk()
     root.title('The Game of Life')
@@ -31,7 +23,7 @@ def setup():
     # OptionMenu takes the root window, the choice object, and we can write
     # in our various options:
     option = OptionMenu(root, choice, 'Choose a Pattern', 'glider',
-                        'glider gun', 'random', command=option_handler())
+                        'glider gun', 'random', command=option_handler)
     option.config(width=20)
 
     # tk object that stores a string.
@@ -40,8 +32,8 @@ def setup():
     # OptionMenu takes the root window, the ruleset object, and we can write
     # in our various options:
     rules = OptionMenu(root, ruleset, 'Traditional',
-                       "Markov Neighbors Normalized", "Coin Flip Traditional",
-                       command=ruleset_handler()
+                       "Markov Neighbors Normalized",
+                       command=ruleset_handler
                        # for binding to functions in menu
                        )
     rules.config(width=30)
@@ -58,23 +50,24 @@ def setup():
     clear_button.bind('<Button-1>', clear_handler)
 
 
-def ruleset_handler():
+def ruleset_handler(event):
     global is_running, start_button, grid_model, next_grid_model, model, \
         model_name
+
+    print('name', model_name)
 
     is_running = False
     start_button.configure(text='Start')
 
-    if model == "Markov Neighbors Normalized":
+    if model_name == "Markov Neighbors Normalized":
         model = markovModelNormalized(grid_model, next_grid_model)
-    elif model == "Coin Flip Traditional":
-        model = coin_flip(grid_model, next_grid_model)
     else:
         model = tradModel(grid_model, next_grid_model)
+    print(model)
     update()
 
 
-def option_handler():
+def option_handler(event):
     global is_running, start_button, choice, model
 
     is_running = False
@@ -94,7 +87,7 @@ def option_handler():
     update()
 
 
-def start_handler():
+def start_handler(event):
     """
     Changes state based on condition of button press.
     """
@@ -109,7 +102,7 @@ def start_handler():
         update()
 
 
-def clear_handler():
+def clear_handler(event):
     global is_running, start_button, model
 
     is_running = False
@@ -142,13 +135,22 @@ def update():
         height, width
 
     grid_view.delete(ALL)
-    grid_model, next_grid_model = model.next_gen()  # was model.next_gen()
-    for i in range(0, height):
-        for j in range(0, width):
-            if model.grid_model[i][j] == 1:
-                draw_cell(i, j, 'black')
-    if is_running:
-        root.after(50, update)
+    # TODO: here the original just calls model.next_gen()
+    model.next_gen()
+    try:
+        # grid_model, next_grid_model = model.next_gen(grid_model,
+        # next_grid_model)
+
+        for i in range(0, height):
+            for j in range(0, width):
+                if model.grid_model[i][j] == 1:
+                    draw_cell(i, j, 'black')
+        if is_running:
+            root.after(50, update)
+    except:
+        pass
+
+
 
 
 def draw_cell(row, col, color):
@@ -165,11 +167,11 @@ def draw_cell(row, col, color):
                                outline=outline)
 
 
-grid_model = [0] * height
-next_grid_model = [0] * height
+
 for n in range(height):
     grid_model[n] = [0] * width
     next_grid_model[n] = [1] * width
+model = tradModel(grid_model, next_grid_model)
 
 if __name__ == '__main__':
     setup()

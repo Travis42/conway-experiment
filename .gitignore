@@ -104,6 +104,7 @@ venv.bak/
 .mypy_cache/
 
 
+.idea/dictionaries/
 .idea/conway-experiment.iml
 .idea/misc.xml
 .idea/modules.xml

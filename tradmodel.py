@@ -1,7 +1,7 @@
 import random
 
-height = 100
-width = 100
+from settings import height, width
+
 
 class tradModel(object):
 
