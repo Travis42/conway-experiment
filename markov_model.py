@@ -13,7 +13,7 @@ It's possible to do Markov, but the probabilities need to be normalized
 
 """
 import random
-import collections as c
+import sys
 
 from settings import height, width
 from tradmodel import tradModel
@@ -21,8 +21,7 @@ from tradmodel import tradModel
 
 class markovModelNormalized(tradModel):
 
-    def __init__(self, grid_model, next_grid_model ):
-        self.cell = c.namedtuple('On', 'rand')
+    def __init__(self, grid_model, next_grid_model):
         self.grid_model = grid_model
         self.next_grid_model = next_grid_model
 
@@ -30,63 +29,83 @@ class markovModelNormalized(tradModel):
         for i in range(0, height):
             for j in range(0, width):
                 rand_val = random.random()
-                if rand_val > 0.8:
-                    grid[i][j] = self.cell(On=1, rand_val=rand_val)
+                if rand_val > 0.9:
+                    grid[i][j] = {'On': 1, 'rand_val': rand_val}
                 else:
-                    grid[i][j] = self.cell(On=0, rand_val=rand_val)
+                    grid[i][j] = {'On': 0, 'rand_val': rand_val}
+        self.grid_model = grid
 
+    #TODO: color each cell in a gradient based on its probability, so that I
+    # can see where high probabilty 'basins' lie.
+    #TODO: fix cell merge, if desired.
 
     def next_gen(self):
-
+        alive_cells = []
         for i in range(0, height):
             for j in range(0, width):
-                # find a live cell
-                    # if live:
-                        # find all probability measures in neighboring cells
-                        # normalize them so they add to 1
-                        # flip a coin based on the relative probabilities.
-                        # the cell that wins is alive, and the cell we're on
-                # is not
-                    # keep a tally of cells turned on this round so we don't
-                # revisit them.
-                alive_or_dead = 0
-                count = self.count_neighbors(self.grid_model, i, j)
-                rand_val = random.random()
-                placeholder = 69
-                if self.grid_model[i][j].On == 0:
-                    if count > placeholder:
-                        alive_or_dead = 1
-                elif self.grid_model[i][j].On == 1:
-                    if count < placeholder:
-                        alive_or_dead = 0
-                self.next_grid_model[i][j] = self.cell(On=alive_or_dead,
-                                                rand_val=rand_val)
+                if self.grid_model[i][j]['On'] == 1 and (i, j) not in \
+                        alive_cells:
+                    # ex. {(x, y): 0.50}
+                    probabilities = self.count_neighbor_probabilities((i, j))
+                    # scrubbing options that are off the grid:
+                    probabilities = {k:v for k, v in probabilities.items()
+                                     if (k[0] >= 0 and k[0] <= width) and
+                                     (k[1] >= 0 and k[1] <= height)}
+                    cell_probabilities_totaled = sum(v for v in
+                                                     probabilities.values())
+                    coords_w_normalized_weights = {k: v /
+                                                   cell_probabilities_totaled
+                                                   for k, v in probabilities.items()}
+                    coordinates = list(coords_w_normalized_weights.keys())
+                    weights = list(coords_w_normalized_weights.values())
+                    next_cell_x, next_cell_y = random.choices(coordinates,
+                                                              weights)[0]
 
+                    self.grid_model[i][j]['On'] = 0
+                    self.next_grid_model[next_cell_x][next_cell_y]['On'] = 1
+                    alive_cells.append((next_cell_x, next_cell_y))
         temp = self.grid_model
         self.grid_model = self.next_grid_model
         self.next_grid_model = temp
 
+    def count_neighbor_probabilities(self, cell_coord):
+        row, col = cell_coord
+        cell_prob_dict = {}
+        neighbor_cells = [
+            (row - 1, col - 0),
+            (row - 1, col - 1),
+            (row - 1, col + 1),
+            (row - 0, col - 1),
+            (row - 0, col + 1),
+            (row + 1, col + 0),
+            (row + 1, col - 1),
+            (row + 1, col + 1)
+        ]
+        for i in neighbor_cells:
+            try:
+                cell_prob_dict[i] = self.grid_model[i[0]][i[1]]['rand_val']
+            except IndexError:  # hit edge of the grid
+                continue
+        return cell_prob_dict
 
-    # TODO: left off here.  This loads objects like the glider.
-
-    # TODO: use this to regen the grid.  By replicating and offsetting, I can
-    # keep the GOL going forever. Just replicate whatever exists, offset it,
-    # and pile it back on itself.
     def load_pattern(self, pattern, x_offset=0, y_offset=0):
         global grid_model
 
         # init to clear the grid:
         for i in range(0, height):
             for j in range(0, width):
-                grid_model[i][j] = 0
+                rand_val = random.random()
+                grid_model[i][j] = self.cell(On=0, rand_val=rand_val)
 
-        # this is offsetting by y amount, to apply the pattern wherever you like.
+        # this is offsetting by y amount, to apply the pattern wherever you
+        # like.
         j = y_offset
 
         for row in pattern:
             # offset by x amount.
             i = x_offset
             for value in row:
-                grid_model[i][j] = value
+                rand_val = random.random()
+                grid_model[i][j] = self.cell(On=value, rand_val=rand_val)
                 i = i + 1
             j = j + 1

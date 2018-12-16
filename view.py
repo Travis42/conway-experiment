@@ -53,7 +53,7 @@ def setup():
 
 def ruleset_handler(event):
     global is_running, start_button, grid_model, next_grid_model, model, \
-     choice
+     choice, numCells, model_name
 
     is_running = False
     start_button.configure(text='Start')
@@ -62,6 +62,8 @@ def ruleset_handler(event):
 
     if model_name == "Markov Neighbors Normalized":
         model = markovModelNormalized(grid_model, next_grid_model)
+        model.randomize(grid_model, width, height)
+        model.randomize(next_grid_model, width, height)
     else:
         model = tradModel(grid_model, next_grid_model)
     print(model)
@@ -133,25 +135,22 @@ def grid_handler(event):
 
 def update():
     global grid_view, root, is_running, model, grid_model, next_grid_model, \
-        height, width
+        height, width, model_name
 
     grid_view.delete(ALL)
     model.next_gen()
-    try:
-        #grid_model, next_grid_model = model.next_gen(grid_model,
-        # next_grid_model)
-
+    if model_name == 'Traditional':
         for i in range(0, height):
             for j in range(0, width):
                 if model.grid_model[i][j] == 1:
                     draw_cell(i, j, 'black')
-        if is_running:
-            root.after(50, update)
-    except:
-        pass
-
-
-
+    elif model_name == 'Markov Neighbors Normalized':
+        for i in range(0, height):
+            for j in range(0, width):
+                if model.grid_model[i][j]['On'] == 1:
+                    draw_cell(i, j, 'black')
+    if is_running:
+        root.after(50, update)
 
 def draw_cell(row, col, color):
     global grid_view, cell_size
@@ -166,11 +165,10 @@ def draw_cell(row, col, color):
                                col * cell_size + cell_size, fill=color,
                                outline=outline)
 
-
-
 for n in range(height):
     grid_model[n] = [0] * width
     next_grid_model[n] = [1] * width
+
 model = tradModel(grid_model, next_grid_model)
 
 if __name__ == '__main__':
