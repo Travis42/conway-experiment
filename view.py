@@ -1,6 +1,7 @@
 from tkinter import *
 
 from markov_model import markovModelNormalized
+from markov_sticky_basins import markovModelStickyBasins
 from patterns import glider_pattern, glider_gun_pattern
 from tradmodel import tradModel
 from settings import *
@@ -34,6 +35,7 @@ def setup():
     # in our various options:
     rules = OptionMenu(root, ruleset, "Traditional",
                        "Markov Neighbors Normalized",
+                       "Markov Sticky Basins",
                        command=ruleset_handler
                        # for binding to functions in menu
                        )
@@ -62,6 +64,10 @@ def ruleset_handler(event):
 
     if model_name == "Markov Neighbors Normalized":
         model = markovModelNormalized(grid_model, next_grid_model)
+        model.randomize(grid_model, width, height)
+        model.randomize(next_grid_model, width, height)
+    elif model_name == "Markov Sticky Basins":
+        model = markovModelStickyBasins(grid_model, next_grid_model)
         model.randomize(grid_model, width, height)
         model.randomize(next_grid_model, width, height)
     else:
@@ -144,7 +150,7 @@ def update():
             for j in range(0, width):
                 if model.grid_model[i][j] == 1:
                     draw_cell(i, j, 'black')
-    elif model_name == 'Markov Neighbors Normalized':
+    elif model_name == 'Markov Neighbors Normalized' or "markovModelStickyBasins":
         for i in range(0, height):
             for j in range(0, width):
                 if model.grid_model[i][j]['On'] == 1:
